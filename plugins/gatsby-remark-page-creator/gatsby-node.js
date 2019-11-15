@@ -30,25 +30,16 @@ function findFileNode({node, getNode}) {
     return fileNode
 }
 
-exports.onCreateNode = ({node, getNode, actions}, options) => {
+exports.onCreateNode = ({ node, actions, getNode }) => {
+  const { createNodeField } = actions
 
-    const {createNodeField} = actions;
-
-    if (node.internal.type === "MarkdownRemark") {
-        let fileNode = findFileNode({node, getNode});
-        if (!fileNode) {
-            throw new Error('could not find parent File node for MarkdownRemark node: ' + node);
-        }
-
-        let url;
-        if (node.frontmatter.url) {
-            url = node.frontmatter.url;
-        } else if (_.get(options, 'uglyUrls', false)) {
-            url = path.join(fileNode.relativeDirectory, fileNode.name + '.html');
-        } else {
-            url = createFilePath({node, getNode});
-        }
-
+  if (node.internal.type === `MarkdownRemark`) {
+    const value = createFilePath({ node, getNode })
+    createNodeField({
+      name: `slug`,
+      node,
+      value,
+    })
         createNodeField({node, name: "url", value: url});
         createNodeField({node, name: "absolutePath", value: fileNode.absolutePath});
         createNodeField({node, name: "relativePath", value: fileNode.relativePath});
